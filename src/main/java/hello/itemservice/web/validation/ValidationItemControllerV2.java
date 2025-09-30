@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -14,9 +15,9 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
-@RequestMapping("/validation/v1/items")
+@RequestMapping("/validation/v2/items")
 @RequiredArgsConstructor
-public class ValidationItemControllerV1 {
+public class ValidationItemControllerV2 {
 
     private final ItemRepository itemRepository;
 
@@ -24,25 +25,25 @@ public class ValidationItemControllerV1 {
     public String items(Model model) {
         List<Item> items = itemRepository.findAll();
         model.addAttribute("items", items);
-        return "validation/v1/items";
+        return "validation/v2/items";
     }
 
     @GetMapping("/{itemId}")
     public String item(@PathVariable long itemId, Model model) {
         Item item = itemRepository.findById(itemId);
         model.addAttribute("item", item);
-        return "validation/v1/item";
+        return "validation/v2/item";
     }
 
     @GetMapping("/add")
     public String addForm(Model model) {
         model.addAttribute("item", new Item());
-        return "validation/v1/addForm";
+        return "validation/v2/addForm";
     }
 
-    //ValidationItemControllerV1 - addItem() 수정
+    //BindingResult1 - ValidationItemControllerV2 - addItemV1
     @PostMapping("/add")
-    public String addItem(@ModelAttribute Item item, RedirectAttributes redirectAttributes, Model model) {
+    public String addItemV1(@ModelAttribute Item item, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
 
         //검증 오류 결과를 보관 -> 만약 검증시 오류가 발생하면 어떤 검증에서 오류가 발생했는지 정보를 담아둔다.
         Map<String, String> errors = new HashMap<>();
@@ -69,27 +70,27 @@ public class ValidationItemControllerV1 {
         //검증에 실패하면 다시 입력 폼으로
         if (!errors.isEmpty()) {
             model.addAttribute("errors", errors);
-            return "validation/v1/addForm";
+            return "validation/v2/addForm";
         }
 
         //성공 로직
         Item savedItem = itemRepository.save(item);
         redirectAttributes.addAttribute("itemId", savedItem.getId());
         redirectAttributes.addAttribute("status", true);
-        return "redirect:/validation/v1/items/{itemId}";
+        return "redirect:/validation/v2/items/{itemId}";
     }
 
     @GetMapping("/{itemId}/edit")
     public String editForm(@PathVariable Long itemId, Model model) {
         Item item = itemRepository.findById(itemId);
         model.addAttribute("item", item);
-        return "validation/v1/editForm";
+        return "validation/v2/editForm";
     }
 
     @PostMapping("/{itemId}/edit")
     public String edit(@PathVariable Long itemId, @ModelAttribute Item item) {
         itemRepository.update(itemId, item);
-        return "redirect:/validation/v1/items/{itemId}";
+        return "redirect:/validation/v2/items/{itemId}";
     }
 
 }
